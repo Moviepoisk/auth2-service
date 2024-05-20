@@ -1,0 +1,77 @@
+version: '3.9'
+
+x-app: &app
+  env_file:
+    - .env
+  restart: always
+
+x-default-logging: &default-logging
+  options:
+    max-size: "10m"
+    max-file: "3"
+  driver: json-file
+
+
+services:
+
+  nginx:
+    image: nginx:1.23.2
+    container_name: Nginx
+    logging: *default-logging
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - common_network
+    ports:
+      - "80:80"
+
+  auth_service:
+    build:
+      context: auth_service
+    container_name: Auth_Service
+    <<: *app
+    logging: *default-logging
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - ./auth_service/src:/opt/src
+    networks:
+      - common_network
+
+  db:
+    image: postgres:14-alpine
+    container_name: Auth_DB
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${AUTH_SERVICE_DB_USER} -d ${AUTH_SERVICE_DB_NAME}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+    restart: always
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    networks:
+      - common_network
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:7.2.3-bookworm"
+    container_name: Redis
+    <<: *app
+    logging: *default-logging
+    networks:
+      - common_network
+
+networks:
+  common_network:
+
+volumes:
+  postgres_volume:

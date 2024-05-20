@@ -1,0 +1,53 @@
+version: '3'
+services:
+
+  api:
+    restart: always
+    build:
+      context: ../../.
+    image: api-image
+    container_name: test_auth_api
+#    command: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    environment:
+      RELOAD: "True"
+      SERVICE_NAME: "api"
+    volumes:
+      - ../../src:/opt/src
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - tests.env
+
+  redis:
+    image: redis:7.0.6-alpine
+    container_name: test_redis
+    restart: always
+    command: redis-server
+
+  db:
+    image: postgres:14-alpine
+    container_name: test_db
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    env_file:
+      - tests.env
+
+  tests:
+    image: api-image
+    entrypoint: >
+      sh -c "pip install -r /tests/functional/requirements.txt
+      && python /tests/functional/utils/wait_for_db.py
+      && python /tests/functional/utils/wait_for_redis.py
+      && pytest /tests/functional"
+    depends_on:
+      - redis
+      - db
+      - api
+    volumes:
+      - ../.:/tests
+    env_file:
+      - tests.env
+
+volumes:
+  dbdata:
