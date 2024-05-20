@@ -21,7 +21,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: "{{ defaultContext }}"
+          context: "./auth_service"
           file: "auth_service/Dockerfile"
           push: true
           tags: "arigatory/moviepoisk-auth2:latest"
