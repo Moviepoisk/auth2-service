@@ -22,7 +22,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: "{{ defaultContext }}"
-          file: "auth_service/Dockerfile"
+          file: "Dockerfile"
           push: true
           tags: "arigatory/moviepoisk-auth2:latest"
 
