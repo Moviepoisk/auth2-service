@@ -1,10 +1,5 @@
 version: '3.9'
 
-x-app: &app
-  env_file:
-    - .env
-  restart: always
-
 x-default-logging: &default-logging
   options:
     max-size: "10m"
@@ -28,10 +23,7 @@ services:
       - "80:80"
 
   auth_service:
-    build:
-      context: auth_service
-    container_name: Auth_Service
-    <<: *app
+    image: auth2
     logging: *default-logging
     depends_on:
       - redis
@@ -40,6 +32,21 @@ services:
       - ./auth_service/src:/opt/src
     networks:
       - common_network
+    ports:
+      - "8000:8000"
+    environment:
+      - AUTH_SERVICE_NAME=${AUTH_SERVICE_NAME}
+      - AUTH_SERVICE_OPENAPI_URL=${AUTH_SERVICE_OPENAPI_URL}
+      - AUTH_SERVICE_DOCS_URL=${AUTH_SERVICE_DOCS_URL}
+      - AUTH_SERVICE_HOST=${AUTH_SERVICE_HOST}
+      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+      - AUTH_SERVICE_WORKERS=${AUTH_SERVICE_WORKERS}
+      - AUTH_SERVICE_LOG_LEVEL=${AUTH_SERVICE_LOG_LEVEL}
+      - AUTH_SERVICE_DB_HOST=${AUTH_SERVICE_DB_HOST}
+      - AUTH_SERVICE_DB_PORT=${AUTH_SERVICE_DB_PORT}
+      - AUTH_SERVICE_DB_NAME=${AUTH_SERVICE_DB_NAME}
+      - AUTH_SERVICE_DB_USER=${AUTH_SERVICE_DB_USER}
+      - AUTH_SERVICE_DB_PASSWORD=${AUTH_SERVICE_DB_PASSWORD}
 
   db:
     image: postgres:14-alpine
@@ -52,8 +59,6 @@ services:
     restart: always
     volumes:
       - postgres_volume:/var/lib/postgresql/data
-    env_file:
-      - .env
     environment:
       PGDATA: "/var/lib/postgresql/data/pgdata"
       POSTGRES_HOST_AUTH_METHOD: "trust"
@@ -65,10 +70,13 @@ services:
   redis:
     image: "redis:7.2.3-bookworm"
     container_name: Redis
-    <<: *app
     logging: *default-logging
     networks:
       - common_network
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_CONNECTION_TIMEOUT=${REDIS_CONNECTION_TIMEOUT}
 
 networks:
   common_network:

@@ -4,9 +4,9 @@ WORKDIR /opt
 
 ENV PYTHONUNBUFFERED=1 PYTHONPATH="$PYTHONPATH:/opt:/opt/src"
 
-COPY ./src ./src
-COPY ./requirements.txt ./requirements.txt
-COPY ./entrypoint.sh ./entrypoint.sh
+COPY ./auth_service/src ./src
+COPY ./auth_service/requirements.txt ./requirements.txt
+COPY ./auth_service/entrypoint.sh ./entrypoint.sh
 
 RUN apt-get update  \
     && apt-get install -y gcc  \
@@ -19,7 +19,7 @@ RUN groupadd -r app  \
     && pip install --upgrade pip  \
     && pip install -r ./requirements.txt --no-cache-dir
 
-COPY . .
+COPY ./auth_service .
 
 RUN chmod +x ./entrypoint.sh
 
