@@ -19,7 +19,7 @@ def has_permission(roles: list[RoleEnum], access_level: int) -> coroutine:
         await authorize.jwt_required()
         user_data = await authorize.get_raw_jwt()
         user_roles = user_data.get("roles")
-        user_level = user_data.get("level")
+        user_level = user_data.get("access_level")
 
         if not any(role in [role.value for role in roles] for role in user_roles):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not allowed for this action.")

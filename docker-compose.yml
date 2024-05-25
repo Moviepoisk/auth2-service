@@ -1,5 +1,3 @@
-version: '3.9'
-
 x-default-logging: &default-logging
   options:
     max-size: "10m"
@@ -23,7 +21,9 @@ services:
       - "80:80"
 
   auth_service:
-    image: auth2
+    build:
+      context: ./auth_service
+    container_name: AuthService
     logging: *default-logging
     depends_on:
       - redis
@@ -34,19 +34,8 @@ services:
       - common_network
     ports:
       - "8000:8000"
-    environment:
-      - AUTH_SERVICE_NAME=${AUTH_SERVICE_NAME}
-      - AUTH_SERVICE_OPENAPI_URL=${AUTH_SERVICE_OPENAPI_URL}
-      - AUTH_SERVICE_DOCS_URL=${AUTH_SERVICE_DOCS_URL}
-      - AUTH_SERVICE_HOST=${AUTH_SERVICE_HOST}
-      - AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
-      - AUTH_SERVICE_WORKERS=${AUTH_SERVICE_WORKERS}
-      - AUTH_SERVICE_LOG_LEVEL=${AUTH_SERVICE_LOG_LEVEL}
-      - AUTH_SERVICE_DB_HOST=${AUTH_SERVICE_DB_HOST}
-      - AUTH_SERVICE_DB_PORT=${AUTH_SERVICE_DB_PORT}
-      - AUTH_SERVICE_DB_NAME=${AUTH_SERVICE_DB_NAME}
-      - AUTH_SERVICE_DB_USER=${AUTH_SERVICE_DB_USER}
-      - AUTH_SERVICE_DB_PASSWORD=${AUTH_SERVICE_DB_PASSWORD}
+    env_file:
+      - .env
 
   db:
     image: postgres:14-alpine
@@ -73,10 +62,8 @@ services:
     logging: *default-logging
     networks:
       - common_network
-    environment:
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_CONNECTION_TIMEOUT=${REDIS_CONNECTION_TIMEOUT}
+    env_file:
+      - .env
 
 networks:
   common_network:
