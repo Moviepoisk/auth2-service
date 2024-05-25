@@ -10,6 +10,7 @@ while ! nc -z "$AUTH_SERVICE_DB_HOST" "$AUTH_SERVICE_DB_PORT"; do
       sleep 0.1
 done
 
+# shellcheck disable=SC2164
 cd src
 alembic upgrade heads
 
