@@ -59,7 +59,7 @@ async def logout(
 
     for token_name in ["access", "refresh"]:
         await redis_service.revoke_token(
-            login=raw_jwt["sub"],
+            email=raw_jwt["sub"],
             token_name=token_name,
             token_value=raw_jwt["jti"],
             ttl=base_auth_jwt_settings.access_expires_time,
