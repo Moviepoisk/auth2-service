@@ -21,3 +21,9 @@ typer==0.12.3
 async-fastapi-jwt-auth==0.6.3
 passlib==1.7.4
 werkzeug==3.0.1
+
+# JAEGER
+opentelemetry-api==1.24.0
+opentelemetry-sdk==1.24.0
+opentelemetry-instrumentation-fastapi==0.45b0
+opentelemetry-exporter-jaeger==1.21.0

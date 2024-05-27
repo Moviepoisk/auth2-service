@@ -1,0 +1,18 @@
+x-default-logging: &default-logging
+  options:
+    max-size: "10m"
+    max-file: "3"
+  driver: json-file
+
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: Jaeger
+    logging: *default-logging
+    restart: always
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+    networks:
+      - common_network
