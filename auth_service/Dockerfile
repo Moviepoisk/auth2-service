@@ -4,7 +4,7 @@ WORKDIR /opt
 
 ENV PYTHONUNBUFFERED=1 PYTHONPATH="$PYTHONPATH:/opt:/opt/src"
 
-COPY src ./src
+
 COPY requirements.txt ./requirements.txt
 COPY entrypoint.sh ./entrypoint.sh
 
