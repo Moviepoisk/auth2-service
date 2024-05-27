@@ -137,3 +137,5 @@ test.py
 *.csv
 
 .env
+.env
+.env
