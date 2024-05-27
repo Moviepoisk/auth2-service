@@ -9,7 +9,6 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.services.rate_limit import RateLimitMiddleware
 from src.api.v1.middlewares import before_request
 from src.api.v1.jaeger import configure_tracer
 from src.api import router as auth_router
@@ -54,6 +53,3 @@ app.include_router(auth_router)
 # Jaeger
 app.middleware("http")(before_request)
 FastAPIInstrumentor.instrument_app(app)
-
-# Добавляем middleware для rate limiting
-app.add_middleware(RateLimitMiddleware)
