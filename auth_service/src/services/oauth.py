@@ -101,18 +101,10 @@ class BaseOAuthService(ABCOAuthService, BaseService):
         self, oauth_id: str, email: str, first_name: str | None, last_name: str | None
     ) -> UserInDB | None:
         """Method to create an oauth user in db."""
-        oauth_user = await self._get_oauth_user_by_id(oauth_id=oauth_id)
-        if oauth_user:
-            return oauth_user.user
-
         user = await self.user_service.create(
             user_create=UserCreate(email=email, first_name=first_name, last_name=last_name)
         )
-        role = await self.role_service.get_by_name(role_name="user")  # TODO assign default role, not by name
-        await self.role_service.assign_role(role=role, user=user)
-
         await self._create_oauth_user(user_id=str(user.id), oauth_id=oauth_id)
-
         return user
 
 
