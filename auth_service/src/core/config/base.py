@@ -60,32 +60,9 @@ class BaseAuthJWTSettings(BaseSettings):
     cookie_csrf_protect: bool
 
 
-class SuperUserCredentials(BaseSettings):
-    """Super User Creadentials class."""
-
-    model_config = SettingsConfigDict(
-        extra="ignore",
-        env_prefix="superuser_",
-        env_file_encoding="utf-8",
-    )
-    email: str
-    password: str
-    first_name: str
-    last_name: str
-    access_level: int = 5
-
-
-class CommandsInitNames(BaseSettings):
-    """Default init names for commands."""
-
-    default_roles: list[str] = ["admin", "user", "staff"]
-
-
 auth_service_settings = AuthServiceSettings()
 redis_settings = RedisSettings()
 base_auth_jwt_settings = BaseAuthJWTSettings()
-superuser_credentials = SuperUserCredentials()
-commands_init_names = CommandsInitNames()
 
 
 # TODO в доке конфиг прописывается так, подумать как привести в примеру выше
