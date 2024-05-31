@@ -11,6 +11,7 @@ class JaegerSettings(BaseSettings):
     )
     agent_host_name: str
     agent_port: int
+    enable: bool = False
 
 
 jaeger_settings = JaegerSettings()
