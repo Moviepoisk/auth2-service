@@ -1,6 +1,6 @@
 """init
 
-Revision ID: 72bf949ebf4a
+Revision ID: 0
 Revises:
 Create Date: 2024-05-26 10:33:33.909166
 
@@ -8,9 +8,10 @@ Create Date: 2024-05-26 10:33:33.909166
 from alembic import op
 import sqlalchemy as sa
 
+from src.alembic.utils.create_partition import create_partitions
 
 # revision identifiers, used by Alembic.
-revision = "72bf949ebf4a"
+revision = "0"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -61,8 +62,10 @@ def upgrade() -> None:
         sa.Column("ip_address", sa.String(length=15), nullable=True),
         sa.Column("login_time", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", "login_time"),
+        postgresql_partition_by="RANGE (login_time)",
     )
+    create_partitions(op=op, table_name="users_login_history", months=36)
     op.create_table(
         "users_roles",
         sa.Column("user_id", sa.UUID(), nullable=False),
