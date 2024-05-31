@@ -1,6 +1,6 @@
 import datetime
 import redis
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from src.core.config import redis_settings
 
@@ -36,7 +36,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         request_number = result[0]
 
         if request_number > REQUEST_LIMIT_PER_MINUTE:
-            raise HTTPException(status_code=429, detail="Too Many Requests")
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too Many Requests")
 
         response = await call_next(request)
         return response
