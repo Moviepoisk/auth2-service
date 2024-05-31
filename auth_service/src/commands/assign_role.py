@@ -4,12 +4,8 @@ import typer
 from sqlalchemy import exc
 from src.commands.base import role_service, user_service
 
-users_roles = [
-    {"user_email": "admin@mail.com", "role_name": ["admin"]},
-    {"user_email": "staff@mail.com", "role_name": ["staff"]},
-    {"user_email": "user@mail.com", "role_name": ["user"]},
-    {"user_email": "staff_user@mail.com", "role_name": ["staff", "user"]},
-]
+
+app = typer.Typer()
 
 
 async def assign_role(user_email: str, role_name: str) -> None:
@@ -32,14 +28,12 @@ async def assign_role(user_email: str, role_name: str) -> None:
         typer.secho(f"Role '{role_name}' assigned to user '{user_email}'.", fg=typer.colors.GREEN)
 
 
-async def _main() -> None:
-    for user_data in users_roles:
-        for role in user_data.get("role_name"):
-            await assign_role(user_email=user_data.get("user_email"), role_name=role)
-
-
-def main():
-    aiorun(_main())
+@app.command()
+def main(
+    email: str = typer.Option(..., help="The email of the user"),
+    role: str = typer.Option(..., help="The role of the user"),
+):
+    aiorun(assign_role(user_email=email, role_name=role))
 
 
 if __name__ == "__main__":
