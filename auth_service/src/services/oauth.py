@@ -1,6 +1,7 @@
 import abc
 import logging
 from enum import Enum
+from typing import Type
 
 import httpx
 from fastapi import Depends
@@ -112,12 +113,19 @@ class OAuthYandexService(BaseOAuthService):
     OAUTH_SERVICE_NAME = "yandex"
 
 
-def get_oauth_yandex_service(
+OAUTH_SERVICE_REGISTRY = {
+    "yandex": OAuthYandexService,
+}
+
+
+def get_oauth_service(
+    provider: str = "yandex",
     pg_connection: AsyncEngine = Depends(get_pg_connection),
     redis: Redis | None = Depends(get_redis),
     role_service: RoleService = Depends(get_role_service),
     user_service: UserService = Depends(get_user_service),
-) -> OAuthYandexService:
-    return OAuthYandexService(
-        pg_connection=pg_connection, redis=redis, role_service=role_service, user_service=user_service
-    )
+) -> BaseOAuthService:
+    service_class: Type[BaseOAuthService] = OAUTH_SERVICE_REGISTRY.get(provider.lower())
+    if not service_class:
+        raise ValueError(f"Unsupported provider: {provider}")
+    return service_class(pg_connection=pg_connection, redis=redis, role_service=role_service, user_service=user_service)

@@ -4,7 +4,9 @@ from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 from fastapi import APIRouter, HTTPException, status, Query, Depends, Header
 from fastapi.responses import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncEngine
 
+from src.core.dependencies import get_pg_connection
 from services import RoleService
 from services.role import get_role_service
 from src.models.role import RoleInDB
@@ -12,8 +14,7 @@ from src.models.user import UserLoginHistoryCreate, UserInDB
 from src.services import RedisService, UserService
 from src.services.redis import get_redis_service
 from src.services.user import get_user_service
-from src.services.oauth import OAuthProviderEnum, get_provider_settings, OAuthYandexService, get_oauth_yandex_service
-
+from src.services.oauth import OAuthProviderEnum, get_provider_settings, get_oauth_service
 
 DEFAULT_ROLE = "user"  # TODO завести константы
 
@@ -39,8 +40,9 @@ async def login(oauth_provider: OAuthProviderEnum):
 auth_dep = AuthJWTBearer()
 
 
-@router.post("/callback/yandex")
+@router.post("/callback/{provider}")
 async def callback(
+    provider: str,
     code: str = Query(...),
     user_agent: Annotated[str | None, Header()] = None,
     x_real_ip: Annotated[str | None, Header()] = None,
@@ -48,16 +50,23 @@ async def callback(
     user_service: UserService = Depends(get_user_service),
     role_service: RoleService = Depends(get_role_service),
     redis_service: RedisService = Depends(get_redis_service),
-    yandex_service: OAuthYandexService = Depends(get_oauth_yandex_service),
+    pg_connection: AsyncEngine = Depends(get_pg_connection),
 ):
+    oauth_service = get_oauth_service(
+        provider=provider,
+        pg_connection=pg_connection,
+        redis=redis_service.redis,
+        role_service=role_service,
+        user_service=user_service,
+    )
     # TODO подумать над сокрытием некоторой логики
-    user_info = await yandex_service.get_user_info(code=code)
+    user_info = await oauth_service.get_user_info(code=code)
 
-    if oauth_user := await yandex_service._get_oauth_user_by_id(oauth_id=user_info.get("id")):
+    if oauth_user := await oauth_service._get_oauth_user_by_id(oauth_id=user_info.get("id")):
         user = oauth_user.user
         user_roles = [str(RoleInDB.model_validate(role)) for role in user.roles]
     else:
-        user = await yandex_service.create_oauth(
+        user = await oauth_service.create_oauth(
             oauth_id=user_info.get("id"),
             email=user_info.get("emails")[0],
             first_name=user_info.get("first_name"),
