@@ -1,4 +1,4 @@
-https://github.com/valerii-chirkov/Auth_sprint_1
+https://github.com/Moviepoisk/auth2-service
 
 # Проектная работа 6 спринта
 
